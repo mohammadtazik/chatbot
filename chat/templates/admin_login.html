@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <title>ورود مدیر</title>
+    <style>
+        body { font-family: sans-serif; direction: rtl; background: #f3f3f3; padding: 50px }
+        form { background: #fff; padding: 30px; max-width: 400px; margin: auto; border-radius: 8px; box-shadow: 0 0 10px #ccc }
+        input { width: 100%; margin: 10px 0; padding: 10px }
+        button { background: #3f51b5; color: white; padding: 10px; border: none; width: 100%; cursor: pointer }
+        .error { color: red }
+    </style>
+</head>
+<body>
+    <form method="post">
+        {% csrf_token %}
+        <h2>ورود مدیر</h2>
+        {% for message in messages %}
+            <div class="error">{{ message }}</div>
+        {% endfor %}
+        <input type="text" name="phone" placeholder="شماره تلفن" required>
+        <input type="password" name="password" placeholder="رمز عبور" required>
+        <button type="submit">ورود</button>
+    </form>
+</body>
+</html>
