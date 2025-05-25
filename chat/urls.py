@@ -1,27 +1,27 @@
-from chat.views.admin_panel import (
+from django.urls import include, path, re_path
+from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
+from rest_framework import permissions
+from rest_framework.routers import DefaultRouter
+from views.admin_panel import (
     admin_login_view,
     admin_logout_view,
     delete_user,
     toggle_ban_user,
     user_admin_panel,
 )
-from chat.views.auth_views import (
+from views.auth_views import (
     RefreshTokenView,
     RequestOTPWithPasswordView,
     VerifyOTPAndLoginView,
 )
-from chat.views.core_views import (
+from views.core_views import (
     ChallengeResponseViewSet,
     ChallengeViewSet,
     MessageViewSet,
     RoomViewSet,
 )
-from chat.views.home import home  # 👈 این خط رو اضافه کن
-from django.urls import include, path, re_path
-from drf_yasg import openapi
-from drf_yasg.views import get_schema_view
-from rest_framework import permissions
-from rest_framework.routers import DefaultRouter
+from views.home import home  # 👈 این خط رو اضافه کن
 
 schema_view = get_schema_view(
     openapi.Info(
