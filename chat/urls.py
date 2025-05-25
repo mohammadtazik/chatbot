@@ -68,17 +68,17 @@ urlpatterns = [
     path("admin/users/<str:user_id>/delete/", delete_user, name="delete_user"),
     # مستندات API
     re_path(
-        r"^api/docs/swagger(?P<format>\.json|\.yaml)$",
+        r"^aswagger(?P<format>\.json|\.yaml)$",
         schema_view.without_ui(cache_timeout=0),
         name="schema_json",
     ),
     path(
-        "api/docs/swagger/",
+        "swagger/",
         schema_view.with_ui("swagger", cache_timeout=0),
         name="schema_swagger_ui",
     ),
     path(
-        "api/docs/redoc/",
+        "redoc/",
         schema_view.with_ui("redoc", cache_timeout=0),
         name="schema_redoc",
     ),
