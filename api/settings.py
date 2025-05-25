@@ -1,3 +1,4 @@
+import os
 from datetime import timedelta
 from pathlib import Path
 
@@ -76,13 +77,20 @@ DATABASES = {
 }
 
 
-MONGO_DATABASE_NAME = "chatbot1"
+# MONGO_DATABASE_NAME = "chatbot1"
+# mongoengine.connect(
+#     db=MONGO_DATABASE_NAME,
+#     alias="default",  # نام مستعار برای اتصال
+#     host="mongodb://localhost:27017/" + MONGO_DATABASE_NAME,  # آدرس MongoDB
+# )
+MONGO_DATABASE_NAME = os.getenv("MONGO_DB_NAME", "chatbot1")
+MONGO_URL = os.getenv("MONGO_URL", f"mongodb://localhost:27017/{MONGO_DATABASE_NAME}")
+
 mongoengine.connect(
     db=MONGO_DATABASE_NAME,
-    alias="default",  # نام مستعار برای اتصال
-    host="mongodb://localhost:27017/" + MONGO_DATABASE_NAME,  # آدرس MongoDB
+    alias="default",
+    host=MONGO_URL,
 )
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
