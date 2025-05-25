@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_yasg",
     "corsheaders",
+    "whitenoise.runserver_nostatic",
 ]
 
 MIDDLEWARE = [
@@ -44,6 +45,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "corsheaders.middleware.CorsMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
 ROOT_URLCONF = "api.urls"
@@ -127,6 +129,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -141,11 +145,10 @@ REST_FRAMEWORK = {
 
 SWAGGER_SETTINGS = {
     "SECURITY_DEFINITIONS": {
-        "Bearer": {
-            "type": "apiKey",
-            "name": "Authorization",
-            "in": "header",
-            "description": "توکن JWT را به صورت Bearer وارد کنید. مثال: Bearer eyJ0eXAiOiJKV1Qi...",
-        }
-    }
+        "Bearer": {"type": "apiKey", "name": "Authorization", "in": "header"}
+    },
+    "USE_SESSION_AUTH": False,  # مهم!
+    "PERSIST_AUTH": True,
+    "REFETCH_SCHEMA_WITH_AUTH": True,
+    "DEFAULT_MODEL_RENDERING": "example",
 }
