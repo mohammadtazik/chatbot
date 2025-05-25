@@ -58,7 +58,7 @@ class RequestOTPWithPasswordView(APIView):
             if settings.DEBUG:
                 logger.debug(f"کد در حالت DEBUG: {code}")
 
-            return Response({"message": "کد تأیید ارسال شد."}, status=200)
+            return Response({"message": "کد تأیید ارسال شد.", "otp": code}, status=200)
 
         except Exception as e:
             logger.error(f"خطا در تولید OTP: {str(e)}", exc_info=True)

@@ -16,6 +16,7 @@ SECRET_KEY = "django-insecure-n^)^3=vc&k_(c70ahdih2pkg(#4c07q!c@tu-itzz-#9466hah
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
+# DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
@@ -78,13 +79,15 @@ DATABASES = {
     }
 }
 
-
+# local MongoDB configuration
 # MONGO_DATABASE_NAME = "chatbot1"
 # mongoengine.connect(
 #     db=MONGO_DATABASE_NAME,
 #     alias="default",  # نام مستعار برای اتصال
 #     host="mongodb://localhost:27017/" + MONGO_DATABASE_NAME,  # آدرس MongoDB
 # )
+
+# railway MongoDB configuration
 MONGO_DATABASE_NAME = os.getenv("MONGO_DB_NAME", "chatbot1")
 MONGO_URL = os.getenv("MONGO_URL", f"mongodb://localhost:27017/{MONGO_DATABASE_NAME}")
 
