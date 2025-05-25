@@ -16,15 +16,13 @@ from chat.views.core_views import (
     MessageViewSet,
     RoomViewSet,
 )
+from chat.views.home import home  # 👈 این خط رو اضافه کن
 from django.urls import include, path, re_path
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
-
-# Swagger Imports 👇
 from rest_framework import permissions
 from rest_framework.routers import DefaultRouter
 
-# 📌 تعریف پشتیبانی از JWT در Swagger
 schema_view = get_schema_view(
     openapi.Info(
         title="Chatbot API",
@@ -37,8 +35,6 @@ schema_view = get_schema_view(
     authentication_classes=[],
 )
 
-
-# Router Definition
 router = DefaultRouter()
 router.register(r"rooms", RoomViewSet, basename="room")
 router.register(r"challenges", ChallengeViewSet, basename="challenge")
@@ -46,7 +42,9 @@ router.register(r"messages", MessageViewSet, basename="message")
 router.register(r"responses", ChallengeResponseViewSet, basename="response")
 
 urlpatterns = [
-    path("", include(router.urls)),
+    path("", home),  # ✅ مسیر ریشه: پیام ساده بده
+    path("api/", include(router.urls)),  # ✅ همه APIها رو بیار زیر /api/
+    # Auth URLs
     path(
         "auth/request-code/", RequestOTPWithPasswordView.as_view(), name="request_code"
     ),
@@ -60,7 +58,7 @@ urlpatterns = [
         "admin/users/<str:user_id>/toggle-ban/", toggle_ban_user, name="toggle_ban_user"
     ),
     path("admin/users/<str:user_id>/delete/", delete_user, name="delete_user"),
-    # 📄 Swagger & ReDoc URLs
+    # Swagger
     re_path(
         r"^swagger(?P<format>\.json|\.yaml)$",
         schema_view.without_ui(cache_timeout=0),
