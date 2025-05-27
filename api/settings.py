@@ -89,29 +89,29 @@ DATABASES = {
 # )
 
 # railway MongoDB configuration
-MONGO_DATABASE_NAME = os.getenv("MONGO_DB_NAME", "chatbot1")
-MONGO_URL = os.getenv(
-    "MONGO_URL",
-    "mongodb://mongo:xShdXSolQJGErfoOagUYJHNEANmzPKZJ@mongodb.railway.internal:27017/chatbot1?retryWrites=true&w=majority",
-)
+# افزایش timeout برای MongoDB
+MONGO_CONFIG = {
+    "host": os.getenv("MONGO_URL", "mongodb://localhost:27017/chatbot1"),
+    "connect": False,
+    "connectTimeoutMS": 30000,
+    "socketTimeoutMS": 30000,
+    "serverSelectionTimeoutMS": 30000,
+}
 
-# اتصال ایمن‌تر با هندل کردن خطاها
-try:
-    mongoengine.connect(
-        db=MONGO_DATABASE_NAME,
-        alias="default",
-        host=MONGO_URL,
-        connectTimeoutMS=60000,
-        serverSelectionTimeoutMS=60000,
-        retryWrites=True,
-        w="majority",
-        maxPoolSize=50,
-        maxIdleTimeMS=30000,
-    )
-    print("✅ اتصال به MongoDB با موفقیت برقرار شد")
-except Exception as e:
-    print(f"❌ خطا در اتصال به MongoDB: {str(e)}")
-    print(f"Traceback: {traceback.format_exc()}")
+# تنظیمات لاگ‌گیری
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "DEBUG" if DEBUG else "INFO",
+    },
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators

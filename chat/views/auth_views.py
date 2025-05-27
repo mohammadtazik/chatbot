@@ -20,49 +20,52 @@ logger.addHandler(handler)
 
 
 class RequestOTPWithPasswordView(APIView):
-    permission_classes = []
-
     def post(self, request):
         try:
-            logger.info("درخواست OTP دریافت شد")
+            logger.info("دریافت درخواست OTP - شروع پردازش")
             phone = request.data.get("phone")
             password = request.data.get("password")
 
+            # اعتبارسنجی اولیه
             if not phone or not password:
-                logger.warning("شماره تلفن یا رمز عبور ارائه نشده")
-                return Response({"error": "شماره و رمز الزامی است."}, status=400)
+                logger.error("فیلدهای ضروری پر نشده")
+                return Response(
+                    {"error": "شماره و رمز الزامی است"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
-            user = User.objects(phone=phone).first()
-            if user:
-                # کاربر قبلاً ثبت‌نام کرده، باید رمز صحیح بده
-                if not user.check_password(password):
-                    logger.warning(f"این شماره قبلا وجود داره: {phone}")
-                    return Response({"error": "این شماره قبلا وجود داره."}, status=401)
-                logger.info(f"کاربر موجود، رمز صحیح است: {phone}")
-            else:
-                logger.info(f"کاربر جدید: {phone}")
+            logger.debug(f"پردازش برای شماره: {phone}")
 
-            logger.info(f"در حال تولید کد OTP برای: {phone}")
+            # تولید کد OTP
             code = str(randint(100000, 999999))
             expires_at = datetime.now(timezone.utc) + timedelta(minutes=2)
 
-            # حذف کدهای قبلی
-            deleted_count = OTPCode.objects(phone=phone).delete()
-            logger.info(f"{deleted_count} کد قبلی حذف شد")
+            # ذخیره در دیتابیس
+            try:
+                OTPCode.objects(phone=phone).delete()
+                otp = OTPCode(phone=phone, code=code, expires_at=expires_at)
+                otp.save()
+                logger.info(f"کد OTP برای {phone} ذخیره شد")
+            except Exception as db_error:
+                logger.error(f"خطای دیتابیس: {str(db_error)}")
+                return Response(
+                    {"error": "خطا در ذخیره کد تأیید"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
 
-            # ذخیره کد جدید
-            OTPCode(phone=phone, code=code, expires_at=expires_at).save()
-            logger.info(f"کد OTP جدید برای {phone} ذخیره شد (انقضا: {expires_at})")
-            logger.info(f"کد OTP برای {phone}: {code}")
-
+            # در محیط توسعه کد را نمایش دهید
             if settings.DEBUG:
-                logger.debug(f"کد در حالت DEBUG: {code}")
+                logger.debug(f"کد OTP (فقط توسعه): {code}")
+                print(f"\n--- کد OTP برای {phone}: {code} ---\n")
 
-            return Response({"message": "کد تأیید ارسال شد.", "otp": code}, status=200)
+            return Response({"message": "کد تأیید ارسال شد"}, status=status.HTTP_200_OK)
 
         except Exception as e:
-            logger.error(f"خطا در تولید OTP: {str(e)}", exc_info=True)
-            return Response({"error": "خطای سرور رخ داده است."}, status=500)
+            logger.critical(f"خطای غیرمنتظره: {str(e)}", exc_info=True)
+            return Response(
+                {"error": "خطای سرور رخ داده است"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 class VerifyOTPAndLoginView(APIView):
