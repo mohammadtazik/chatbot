@@ -91,12 +91,20 @@ DATABASES = {
 MONGO_DATABASE_NAME = os.getenv("MONGO_DB_NAME", "chatbot1")
 MONGO_URL = os.getenv("MONGO_URL", f"mongodb://localhost:27017/{MONGO_DATABASE_NAME}")
 
-mongoengine.connect(
-    db=MONGO_DATABASE_NAME,
-    alias="default",
-    host=MONGO_URL,
-)
-
+# اتصال ایمن‌تر با هندل کردن خطاها
+try:
+    mongoengine.connect(
+        db=MONGO_DATABASE_NAME,
+        alias="default",
+        host=MONGO_URL,
+        connectTimeoutMS=30000,  # افزایش زمان انتظار
+        serverSelectionTimeoutMS=30000,
+        retryWrites=True,
+        w="majority",
+    )
+    print("✅ اتصال به MongoDB با موفقیت برقرار شد")
+except Exception as e:
+    print(f"❌ خطا در اتصال به MongoDB: {str(e)}")
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
