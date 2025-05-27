@@ -105,6 +105,7 @@ try:
     print("✅ اتصال به MongoDB با موفقیت برقرار شد")
 except Exception as e:
     print(f"❌ خطا در اتصال به MongoDB: {str(e)}")
+
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
