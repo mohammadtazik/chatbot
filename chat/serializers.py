@@ -29,7 +29,7 @@ class RoomSerializer(serializers.Serializer):
     room_type = serializers.ChoiceField(choices=[x[0] for x in Room.ROOM_TYPES])
     language = serializers.CharField(default="fa")
     max_members = serializers.IntegerField(default=100)
-    creator = serializers.PrimaryKeyRelatedField(queryset=User.objects.none())
+    creator = serializers.CharField()
     is_active = serializers.BooleanField(default=True)
     created_at = serializers.DateTimeField(read_only=True)
 
@@ -54,6 +54,13 @@ class RoomSerializer(serializers.Serializer):
     def validate_language(self, value):
         if not value:
             return "fa"
+        return value
+
+    def validate_creator(self, value):
+        from .models import User
+
+        if not User.objects(id=value).first():
+            raise serializers.ValidationError("کاربر پیدا نشد.")
         return value
 
 
