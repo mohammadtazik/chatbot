@@ -29,9 +29,17 @@ class RoomSerializer(serializers.Serializer):
     room_type = serializers.ChoiceField(choices=[x[0] for x in Room.ROOM_TYPES])
     language = serializers.CharField(default="fa")
     max_members = serializers.IntegerField(default=100)
-    creator = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    creator = serializers.PrimaryKeyRelatedField(queryset=User.objects.none())
     is_active = serializers.BooleanField(default=True)
     created_at = serializers.DateTimeField(read_only=True)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # تنظیم queryset بعد از اطمینان از اتصال به DB
+        try:
+            self.fields["creator"].queryset = User.objects.all()
+        except Exception:
+            self.fields["creator"].queryset = User.objects.none()
 
     def validate_title(self, value):
         if not value or value.strip() == "":
@@ -69,7 +77,7 @@ class ChallengeSerializer(serializers.Serializer):
         return value
 
     def validate_expiration_time(self, value):
-        if value <= datetime.utcnow():
+        if value <= datetime.datetime.utcnow():
             raise serializers.ValidationError("زمان انقضا باید در آینده باشد.")
         return value
 
