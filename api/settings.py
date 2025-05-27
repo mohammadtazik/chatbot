@@ -1,3 +1,4 @@
+import logging
 import os
 import traceback
 import urllib.parse
@@ -6,6 +7,7 @@ from pathlib import Path
 
 import mongoengine
 from mongoengine import connect
+from pymongo.errors import ConnectionFailure
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -90,29 +92,36 @@ DATABASES = {
 #     host="mongodb://localhost:27017/" + MONGO_DATABASE_NAME,  # آدرس MongoDB
 # )
 
+# پیکربندی لاگ
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 # railway MongoDB configuration
-# رمزنگاری ایمن اطلاعات اتصال
+# تنظیمات اتصال
 MONGO_USER = urllib.parse.quote_plus("mongo")
 MONGO_PASS = urllib.parse.quote_plus("xShdXSolQJGErfoOagUYJHNEANmzPKZJ")
 MONGO_HOST = "switchyard.proxy.rlwy.net"
 MONGO_PORT = 39595
-MONGO_DB_NAME = "chatbot1"  # یا نام دیتابیس مورد نظر شما
+MONGO_DB_NAME = "chatbot1"
 
-# ساخت رشته اتصال ایمن
 MONGO_URL = f"mongodb://{MONGO_USER}:{MONGO_PASS}@{MONGO_HOST}:{MONGO_PORT}/{MONGO_DB_NAME}?authSource=admin"
 
-# تنظیمات اتصال پیشرفته
-connect(
-    db=MONGO_DB_NAME,
-    host=MONGO_URL,
-    alias="default",
-    connectTimeoutMS=30000,
-    socketTimeoutMS=30000,
-    serverSelectionTimeoutMS=30000,
-    retryWrites=True,
-    w="majority",
-    ssl=True,  # اگر سرور از SSL پشتیبانی می‌کند
-)
+try:
+    connect(
+        db=MONGO_DB_NAME,
+        host=MONGO_URL,
+        alias="default",
+        connectTimeoutMS=30000,
+        socketTimeoutMS=30000,
+        serverSelectionTimeoutMS=30000,
+        retryWrites=True,
+        w="majority",
+        ssl=True,
+    )
+    logger.info("✅ اتصال به MongoDB با موفقیت برقرار شد.")
+except ConnectionFailure as e:
+    logger.error("❌ اتصال به MongoDB شکست خورد:", exc_info=True)
+except Exception as e:
+    logger.error("❌ خطای غیرمنتظره در اتصال به MongoDB:", exc_info=True)
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
