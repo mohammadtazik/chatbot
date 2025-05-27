@@ -101,13 +101,12 @@ try:
         db=MONGO_DATABASE_NAME,
         alias="default",
         host=MONGO_URL,
-        connectTimeoutMS=60000,  # 60 ثانیه
+        connectTimeoutMS=60000,
         serverSelectionTimeoutMS=60000,
-        socketTimeoutMS=60000,  # اضافه کردن برای جلوگیری از Timeout در عملیات
         retryWrites=True,
         w="majority",
-        maxPoolSize=50,  # حداکثر تعداد اتصال‌ها
-        maxIdleTimeMS=30000,  # حداکثر زمان بیکاری اتصال
+        maxPoolSize=50,
+        maxIdleTimeMS=30000,
     )
     print("✅ اتصال به MongoDB با موفقیت برقرار شد")
 except Exception as e:
