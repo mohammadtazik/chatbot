@@ -1,4 +1,5 @@
 import os
+import traceback
 from datetime import timedelta
 from pathlib import Path
 
@@ -89,7 +90,10 @@ DATABASES = {
 
 # railway MongoDB configuration
 MONGO_DATABASE_NAME = os.getenv("MONGO_DB_NAME", "chatbot1")
-MONGO_URL = os.getenv("MONGO_URL", f"mongodb://localhost:27017/{MONGO_DATABASE_NAME}")
+MONGO_URL = os.getenv(
+    "MONGO_URL",
+    "mongodb://mongo:xShdXSolQJGErfoOagUYJHNEANmzPKZJ@mongodb.railway.internal:27017/chatbot1?retryWrites=true&w=majority",
+)
 
 # اتصال ایمن‌تر با هندل کردن خطاها
 try:
@@ -97,14 +101,17 @@ try:
         db=MONGO_DATABASE_NAME,
         alias="default",
         host=MONGO_URL,
-        connectTimeoutMS=30000,  # افزایش زمان انتظار
-        serverSelectionTimeoutMS=30000,
+        connectTimeoutMS=60000,
+        serverSelectionTimeoutMS=60000,
         retryWrites=True,
         w="majority",
+        maxPoolSize=50,
+        maxIdleTimeMS=30000,
     )
     print("✅ اتصال به MongoDB با موفقیت برقرار شد")
 except Exception as e:
     print(f"❌ خطا در اتصال به MongoDB: {str(e)}")
+    print(f"Traceback: {traceback.format_exc()}")
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
