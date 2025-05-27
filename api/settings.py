@@ -115,8 +115,6 @@ try:
         serverSelectionTimeoutMS=10000,
         retryWrites=True,
         w="majority",
-        tls=True,
-        tlsAllowInvalidCertificates=True,
     )
     logger.info("✅ اتصال به MongoDB با موفقیت برقرار شد.")
 except ConnectionFailure:
