@@ -110,13 +110,15 @@ try:
         db=MONGO_DB_NAME,
         host=MONGO_URL,
         alias="default",
-        connectTimeoutMS=30000,
-        socketTimeoutMS=30000,
-        serverSelectionTimeoutMS=30000,
+        connectTimeoutMS=10000,
+        socketTimeoutMS=10000,
+        serverSelectionTimeoutMS=10000,
         retryWrites=True,
         w="majority",
-        ssl=True,
+        tls=True,
+        tlsAllowInvalidCertificates=True,
     )
+
     logger.info("✅ اتصال به MongoDB با موفقیت برقرار شد.")
 except ConnectionFailure as e:
     logger.error("❌ اتصال به MongoDB شکست خورد:", exc_info=True)
