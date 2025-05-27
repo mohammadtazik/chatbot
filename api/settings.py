@@ -118,9 +118,8 @@ try:
         tls=True,
         tlsAllowInvalidCertificates=True,
     )
-
     logger.info("✅ اتصال به MongoDB با موفقیت برقرار شد.")
-except ConnectionFailure as e:
+except ConnectionFailure:
     logger.error("❌ اتصال به MongoDB شکست خورد:", exc_info=True)
 except Exception as e:
     logger.error("❌ خطای غیرمنتظره در اتصال به MongoDB:", exc_info=True)
