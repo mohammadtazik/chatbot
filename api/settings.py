@@ -1,9 +1,11 @@
 import os
 import traceback
+import urllib.parse
 from datetime import timedelta
 from pathlib import Path
 
 import mongoengine
+from mongoengine import connect
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -89,29 +91,28 @@ DATABASES = {
 # )
 
 # railway MongoDB configuration
-# افزایش timeout برای MongoDB
-MONGO_CONFIG = {
-    "host": os.getenv("MONGO_URL", "mongodb://localhost:27017/chatbot1"),
-    "connect": False,
-    "connectTimeoutMS": 30000,
-    "socketTimeoutMS": 30000,
-    "serverSelectionTimeoutMS": 30000,
-}
+# رمزنگاری ایمن اطلاعات اتصال
+MONGO_USER = urllib.parse.quote_plus("mongo")
+MONGO_PASS = urllib.parse.quote_plus("xShdXSolQJGErfoOagUYJHNEANmzPKZJ")
+MONGO_HOST = "switchyard.proxy.rlwy.net"
+MONGO_PORT = 39595
+MONGO_DB_NAME = "chatbot1"  # یا نام دیتابیس مورد نظر شما
 
-# تنظیمات لاگ‌گیری
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "handlers": {
-        "console": {
-            "class": "logging.StreamHandler",
-        },
-    },
-    "root": {
-        "handlers": ["console"],
-        "level": "DEBUG" if DEBUG else "INFO",
-    },
-}
+# ساخت رشته اتصال ایمن
+MONGO_URL = f"mongodb://{MONGO_USER}:{MONGO_PASS}@{MONGO_HOST}:{MONGO_PORT}/{MONGO_DB_NAME}?authSource=admin"
+
+# تنظیمات اتصال پیشرفته
+connect(
+    db=MONGO_DB_NAME,
+    host=MONGO_URL,
+    alias="default",
+    connectTimeoutMS=30000,
+    socketTimeoutMS=30000,
+    serverSelectionTimeoutMS=30000,
+    retryWrites=True,
+    w="majority",
+    ssl=True,  # اگر سرور از SSL پشتیبانی می‌کند
+)
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
