@@ -75,6 +75,55 @@ class RoomViewSet(viewsets.ViewSet):
         return super().get_permissions()
 
 
+class RoomViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticatedMongo, IsNotBanned]
+
+    def list(self, request):
+        logger.info("Listing all active rooms")
+        rooms = Room.objects(is_active=True).order_by("-created_at")
+        serializer = RoomSerializer(rooms, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        logger.info(f"Retrieving room with id: {pk}")
+        room = Room.objects(id=pk).first()
+        if not room:
+            logger.warning(f"Room not found with id: {pk}")
+            return Response(
+                {"detail": "اتاق پیدا نشد."}, status=status.HTTP_404_NOT_FOUND
+            )
+        return Response(RoomSerializer(room).data)
+
+    def create(self, request):
+        logger.info("Creating new room")
+        serializer = RoomSerializer(data=request.data)
+        if serializer.is_valid():
+            room = Room(**serializer.validated_data)
+            room.created_at = datetime.utcnow()
+            room.creator = request.mongo_user
+            room.save()
+            logger.info(f"Room created successfully with id: {room.id}")
+            return Response(RoomSerializer(room).data, status=status.HTTP_201_CREATED)
+        logger.error(f"Room creation failed with errors: {serializer.errors}")
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, pk=None):
+        logger.info(f"Attempting to delete room with id: {pk}")
+        room = Room.objects(id=pk).first()
+        if not room:
+            logger.warning(f"Room not found for deletion with id: {pk}")
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        self.check_object_permissions(request, room)  # بررسی مالکیت
+        room.delete()
+        logger.info(f"Room deleted successfully with id: {pk}")
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def get_permissions(self):
+        if self.action in ["destroy"]:
+            return [IsAuthenticatedMongo(), IsNotBanned(), IsRoomCreator()]
+        return super().get_permissions()
+
+
 class ChallengeViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticatedMongo, IsNotBanned]
 
@@ -126,15 +175,40 @@ class MessageViewSet(viewsets.ViewSet):
     def like(self, request, pk=None):
         logger.info(f"Attempting to like message with id: {pk}")
         message = Message.objects(id=pk).first()
+
+        if not message:
+            return Response(
+                {"detail": "پیام پیدا نشد."}, status=status.HTTP_404_NOT_FOUND
+            )
+
         user_id = str(request.mongo_user.id)
-        if message and user_id not in getattr(message, "likes", []):
-            message.likes = getattr(message, "likes", []) + [user_id]
-            message.save()
+
+        # بهتر است از atomic operation استفاده کنید
+        if user_id not in (message.likes or []):
+            Message.objects(id=pk).update_one(add_to_set__likes=user_id)
+            message.reload()  # reload از MongoDB
             logger.info(f"Message liked successfully with id: {pk}")
         else:
-            logger.warning(
-                f"Message like failed for id: {pk} - already liked or not found"
+            logger.info(f"Message already liked by user: {user_id}")
+
+        return Response(MessageSerializer(message).data)
+
+    @action(detail=True, methods=["delete"])
+    def unlike(self, request, pk=None):
+        logger.info(f"Attempting to unlike message with id: {pk}")
+        message = Message.objects(id=pk).first()
+
+        if not message:
+            return Response(
+                {"detail": "پیام پیدا نشد."}, status=status.HTTP_404_NOT_FOUND
             )
+
+        user_id = str(request.mongo_user.id)
+        if user_id in (message.likes or []):
+            Message.objects(id=pk).update_one(pull__likes=user_id)
+            message.reload()
+            logger.info(f"Message unliked successfully with id: {pk}")
+
         return Response(MessageSerializer(message).data)
 
     @action(detail=True, methods=["post"])
