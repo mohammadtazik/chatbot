@@ -209,6 +209,10 @@ if not DEBUG:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
 
+# Create logs directory if it doesn't exist
+LOGS_DIR = BASE_DIR / "logs"
+LOGS_DIR.mkdir(exist_ok=True)
+
 # Logging Configuration
 LOGGING = {
     "version": 1,
@@ -230,7 +234,7 @@ LOGGING = {
         },
         "file": {
             "class": "logging.FileHandler",
-            "filename": BASE_DIR / "logs" / "django.log",
+            "filename": str(LOGS_DIR / "django.log"),
             "formatter": "verbose",
         },
     },
@@ -240,12 +244,12 @@ LOGGING = {
     },
     "loggers": {
         "django": {
-            "handlers": ["console", "file"],
+            "handlers": ["console"],  # فقط console برای جلوگیری از مشکل
             "level": "INFO",
             "propagate": False,
         },
         "chat": {
-            "handlers": ["console", "file"],
+            "handlers": ["console"],  # فقط console برای جلوگیری از مشکل
             "level": "DEBUG" if DEBUG else "INFO",
             "propagate": False,
         },
