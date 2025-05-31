@@ -67,9 +67,10 @@ urlpatterns = [
     path("admin/logout/", admin_logout_view, name="admin_logout"),
     path("admin/users/", user_admin_panel, name="user_admin_panel"),
     path(
-        "admin/users/<str:user_id>/toggle-ban/", toggle_ban_user, name="toggle_ban_user"
+        "admin/users/<int:user_id>/toggle-ban/", toggle_ban_user, name="toggle_ban_user"
     ),
-    path("admin/users/<str:user_id>/delete/", delete_user, name="delete_user"),
+    path("admin/users/<int:user_id>/delete/", delete_user, name="delete_user"),
+    # API های مود و محتوا
     path("api/mood/submit/", SubmitMoodAPIView.as_view(), name="submit_mood"),
     path(
         "api/mood/suggestions/",
@@ -84,7 +85,7 @@ urlpatterns = [
     ),
     # مستندات API
     re_path(
-        r"^aswagger(?P<format>\.json|\.yaml)$",
+        r"^swagger(?P<format>\.json|\.yaml)$",
         schema_view.without_ui(cache_timeout=0),
         name="schema_json",
     ),
@@ -103,3 +104,4 @@ urlpatterns = [
 # فقط در حالت توسعه فایل‌های استاتیک سرویس دهی شوند
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

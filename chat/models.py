@@ -108,6 +108,11 @@ class OTPCode(Document):
     code = StringField(required=True)
     expires_at = DateTimeField(required=True)
 
+    meta = {
+        "collection": "otp_codes",
+        "indexes": [{"fields": ["expires_at"], "expireAfterSeconds": 0}, "phone"],
+    }
+
 
 class UserMood(Document):
     user = fields.ReferenceField(User, required=True)
