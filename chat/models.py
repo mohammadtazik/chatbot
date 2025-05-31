@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from mongoengine import BooleanField, DateTimeField, Document, StringField, fields
 from passlib.context import CryptContext
@@ -13,7 +13,7 @@ class User(Document):
     email = fields.EmailField()
     is_banned = fields.BooleanField(default=False)
     is_admin = BooleanField(default=False)
-    created_at = fields.DateTimeField(default=datetime.utcnow)
+    created_at = fields.DateTimeField(default=lambda: datetime.now(timezone.utc))
 
     meta = {"collection": "users", "indexes": ["phone"]}
 
@@ -38,7 +38,7 @@ class Room(Document):
     room_type = fields.StringField(choices=ROOM_TYPES)
     language = fields.StringField(default="fa")
     max_members = fields.IntField(default=100)
-    created_at = fields.DateTimeField(default=datetime.utcnow)
+    created_at = fields.DateTimeField(default=lambda: datetime.now(timezone.utc))
     creator = fields.ReferenceField(User)
     is_active = fields.BooleanField(default=True)
 
@@ -57,7 +57,7 @@ class Challenge(Document):
     title = fields.StringField(required=True, max_length=100)
     description = fields.StringField()
     media_url = fields.URLField()
-    created_at = fields.DateTimeField(default=datetime.utcnow)
+    created_at = fields.DateTimeField(default=lambda: datetime.now(timezone.utc))
     expiration_time = fields.DateTimeField(required=True)
 
     meta = {
@@ -72,7 +72,7 @@ class Message(Document):
     )  # CASCADE
     user_id = fields.StringField(required=True)  # ناشناس
     content = fields.StringField(required=True)
-    created_at = fields.DateTimeField(default=datetime.utcnow)
+    created_at = fields.DateTimeField(default=lambda: datetime.now(timezone.utc))
     is_reply = fields.BooleanField(default=False)
     parent_message = fields.ReferenceField("self")
     is_rebuke = fields.BooleanField(default=False)  # ریبای (توبیخ)
@@ -95,7 +95,7 @@ class Message(Document):
 class ChallengeResponse(Document):
     user_id = fields.StringField(required=True)
     challenge = fields.ReferenceField(Challenge)
-    answered_at = fields.DateTimeField(default=datetime.utcnow)
+    answered_at = fields.DateTimeField(default=lambda: datetime.now(timezone.utc))
 
     meta = {
         "collection": "challenge_responses",
@@ -115,7 +115,7 @@ class UserMood(Document):
         required=True,
         choices=["happy", "sad", "angry", "stressed", "relaxed", "neutral"],
     )
-    created_at = fields.DateTimeField(default=datetime.utcnow)
+    created_at = fields.DateTimeField(default=lambda: datetime.now(timezone.utc))
 
     meta = {"collection": "user_moods", "indexes": ["user", "-created_at"]}
 
@@ -129,7 +129,7 @@ class Content(Document):
     mood_tags = fields.ListField(fields.StringField())  # مثل ["relaxed", "happy"]
     media_url = fields.URLField()
     is_popular = fields.BooleanField(default=False)
-    created_at = fields.DateTimeField(default=datetime.utcnow)
+    created_at = fields.DateTimeField(default=lambda: datetime.now(timezone.utc))
 
     meta = {
         "collection": "contents",
