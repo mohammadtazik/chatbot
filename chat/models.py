@@ -107,3 +107,31 @@ class OTPCode(Document):
     phone = StringField(required=True)
     code = StringField(required=True)
     expires_at = DateTimeField(required=True)
+
+
+class UserMood(Document):
+    user = fields.ReferenceField(User, required=True)
+    mood = fields.StringField(
+        required=True,
+        choices=["happy", "sad", "angry", "stressed", "relaxed", "neutral"],
+    )
+    created_at = fields.DateTimeField(default=datetime.utcnow)
+
+    meta = {"collection": "user_moods", "indexes": ["user", "-created_at"]}
+
+
+class Content(Document):
+    title = fields.StringField(required=True)
+    description = fields.StringField()
+    category = fields.StringField(
+        required=True, choices=["meditation", "music", "story", "chatbot"]
+    )
+    mood_tags = fields.ListField(fields.StringField())  # مثل ["relaxed", "happy"]
+    media_url = fields.URLField()
+    is_popular = fields.BooleanField(default=False)
+    created_at = fields.DateTimeField(default=datetime.utcnow)
+
+    meta = {
+        "collection": "contents",
+        "indexes": ["category", "mood_tags", "-created_at"],
+    }

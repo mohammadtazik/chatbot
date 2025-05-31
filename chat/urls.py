@@ -11,10 +11,14 @@ from chat.views.auth_views import (
     VerifyOTPAndLoginView,
 )
 from chat.views.core_views import (
+    CategoryListAPIView,
     ChallengeResponseViewSet,
     ChallengeViewSet,
     MessageViewSet,
+    MoodSuggestionsAPIView,
+    PopularContentAPIView,
     RoomViewSet,
+    SubmitMoodAPIView,
 )
 from chat.views.home import home
 from django.conf import settings
@@ -66,6 +70,18 @@ urlpatterns = [
         "admin/users/<str:user_id>/toggle-ban/", toggle_ban_user, name="toggle_ban_user"
     ),
     path("admin/users/<str:user_id>/delete/", delete_user, name="delete_user"),
+    path("api/mood/submit/", SubmitMoodAPIView.as_view(), name="submit_mood"),
+    path(
+        "api/mood/suggestions/",
+        MoodSuggestionsAPIView.as_view(),
+        name="mood_suggestions",
+    ),
+    path(
+        "api/content/popular/", PopularContentAPIView.as_view(), name="popular_content"
+    ),
+    path(
+        "api/content/categories/", CategoryListAPIView.as_view(), name="category_list"
+    ),
     # مستندات API
     re_path(
         r"^aswagger(?P<format>\.json|\.yaml)$",

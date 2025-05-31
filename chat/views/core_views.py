@@ -2,15 +2,17 @@ import logging
 from datetime import datetime
 
 from chat.auth_backends import IsAuthenticatedMongo, IsNotBanned, IsRoomCreator
-from chat.models import Challenge, ChallengeResponse, Message, Room
+from chat.models import Challenge, ChallengeResponse, Content, Message, Room, UserMood
 from chat.serializers import (
     ChallengeResponseSerializer,
     ChallengeSerializer,
+    ContentSerializer,
     MessageSerializer,
     RoomSerializer,
+    UserMoodSerializer,
 )
-from mongoengine.errors import NotUniqueError
-from rest_framework import status, viewsets
+from mongoengine.errors import NotUniqueError, ValidationError
+from rest_framework import status, views, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -253,3 +255,47 @@ class ChallengeResponseViewSet(viewsets.ViewSet):
             f"Challenge response creation failed with errors: {serializer.errors}"
         )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class SubmitMoodAPIView(views.APIView):
+    permission_classes = [IsAuthenticatedMongo]
+
+    def post(self, request):
+        serializer = UserMoodSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=400)
+
+        UserMood.objects.create(
+            user=request.mongo_user,
+            mood=serializer.validated_data["mood"],
+            created_at=datetime.utcnow(),
+        )
+        return Response({"message": "حال روحی ثبت شد."}, status=201)
+
+
+class MoodSuggestionsAPIView(views.APIView):
+    permission_classes = [IsAuthenticatedMongo]
+
+    def get(self, request):
+        last_mood = (
+            UserMood.objects(user=request.mongo_user).order_by("-created_at").first()
+        )
+        if not last_mood:
+            return Response({"suggestions": []}, status=200)
+
+        contents = Content.objects(mood_tags=last_mood.mood).order_by("-created_at")
+        serializer = ContentSerializer(contents, many=True)
+        return Response({"suggestions": serializer.data}, status=200)
+
+
+class PopularContentAPIView(views.APIView):
+    def get(self, request):
+        contents = Content.objects(is_popular=True).order_by("-created_at")[:10]
+        serializer = ContentSerializer(contents, many=True)
+        return Response({"popular": serializer.data}, status=200)
+
+
+class CategoryListAPIView(views.APIView):
+    def get(self, request):
+        categories = Content.objects.distinct("category")
+        return Response({"categories": categories}, status=200)

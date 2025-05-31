@@ -120,3 +120,25 @@ class ChallengeResponseSerializer(serializers.Serializer):
         if not Challenge.objects.filter(id=value).exists():
             raise serializers.ValidationError("چالش وجود ندارد.")
         return value
+
+
+class ContentSerializer(serializers.Serializer):
+    id = serializers.CharField(read_only=True)
+    title = serializers.CharField()
+    description = serializers.CharField(required=False, allow_null=True)
+    category = serializers.ChoiceField(
+        choices=["meditation", "music", "story", "chatbot"]
+    )
+    media_url = serializers.URLField(required=False, allow_null=True)
+    mood_tags = serializers.ListField(child=serializers.CharField())
+    is_popular = serializers.BooleanField(default=False)
+    created_at = serializers.DateTimeField(read_only=True)
+
+
+class UserMoodSerializer(serializers.Serializer):
+    id = serializers.CharField(read_only=True)
+    user = serializers.CharField(read_only=True)
+    mood = serializers.ChoiceField(
+        choices=["happy", "sad", "angry", "stressed", "relaxed", "neutral"]
+    )
+    created_at = serializers.DateTimeField(read_only=True)
